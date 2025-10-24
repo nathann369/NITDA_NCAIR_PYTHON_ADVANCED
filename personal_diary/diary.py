@@ -1,5 +1,6 @@
 from datetime import datetime
 from errors import DiaryLockedError, EntryNotFoundError
+from utils import within_date_range
 
 class Entry:
     def __init__(self, title, content, date=None):
@@ -24,13 +25,17 @@ class Diary:
             return True
         raise DiaryLockedError("Incorrect password")
 
-    def lock(self):
-        self.locked = True
-
     def add_entry(self, entry):
         if self.locked:
             raise DiaryLockedError("Diary is locked!")
         self.entries.append(entry)
+
+    def edit_entry(self, title, new_content):
+        for e in self.entries:
+            if e.title == title:
+                e.content = new_content
+                return
+        raise EntryNotFoundError(f"No entry found with title '{title}'")
 
     def delete_entry(self, title):
         for e in self.entries:
@@ -39,5 +44,10 @@ class Diary:
                 return
         raise EntryNotFoundError(f"No entry found with title '{title}'")
 
-    def search(self, keyword):
-        return [e for e in self.entries if keyword.lower() in e.content.lower() or keyword.lower() in e.title.lower()]
+    def search(self, keyword=None, start_date=None, end_date=None):
+        results = self.entries
+        if keyword:
+            results = [e for e in results if keyword.lower() in e.title.lower() or keyword.lower() in e.content.lower()]
+        if start_date and end_date:
+            results = [e for e in results if within_date_range(e.date, start_date, end_date)]
+        return results

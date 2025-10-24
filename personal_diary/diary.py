@@ -48,15 +48,10 @@ class Diary:
                 return
         raise EntryNotFoundError(f"Entry '{title}' not found.")
 
-    def search(self, keyword="", start_date=None, end_date=None):
-        """Search entries by keyword or date range."""
-        results = []
-        for e in self.entries:
-            if keyword.lower() in e.title.lower() or keyword.lower() in e.content.lower():
-                results.append(e)
-            elif start_date and end_date and start_date <= e.date <= end_date:
-                results.append(e)
-        return results
+    def search(self, keyword):
+        """Search entries by keyword in title or content."""
+        return [e for e in self.entries if keyword.lower() in e["content"].lower() or keyword.lower() in e["title"].lower()]
+ 
 
     def lock(self):
         self.locked = True
